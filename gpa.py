@@ -1,4 +1,4 @@
-#coding=utf8
+#coding=utf-8
 
 # last edit date: 2016/09/19
 # author: Forec
@@ -21,14 +21,14 @@ import urllib, urllib2, cookielib, re, sys, os
 import pytesseract
 from PIL import Image
 from bs4 import BeautifulSoup
-
+"""
 if len(sys.argv) != 3:
 	print "Usage: python2 gpa.py <id> <pwd>"
 	sys.exit(0)
 else:
 	username = sys.argv[1]
 	password = sys.argv[2]
-
+"""
 cookie = cookielib.CookieJar()
 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie))
 
@@ -38,7 +38,7 @@ tryTime = 0
 while True:
 	tryTime += 1
 	if tryTime > 5:
-		os.remove("check.jpeg")
+		os.remove("check.jpg")
 		print "Cannot connect URP!"
 		sys.exit(0)
 	headers = {
@@ -54,15 +54,15 @@ while True:
 		headers = headers
 	)
 	result = opener.open(req)
-	with open("check.jpeg", "wb") as f:
+	with open("check.jpg", "wb") as f:
 		f.write(result.read())
 	# Get Optical Character Recognition
-	checkInfo = str(pytesseract.image_to_string(Image.open('check.jpeg')))
+	checkInfo = str(pytesseract.image_to_string(Image.open('check.jpg')))
 
 	postdata=urllib.urlencode({
 		'type' : 'sso',
-	    'zjh'  : username,
-	    'mm'   : password,
+	    'zjh'  : '2014210262',   #username
+	    'mm'   : 'hutr96',       #password
 	    'v_yzm': checkInfo
 	})
 
@@ -74,38 +74,40 @@ while True:
 	    headers = headers
 	)
 	result = opener.open(req)
-	bt = BeautifulSoup(result.read(), "html.parser",from_encoding="gbk")
+	bt = BeautifulSoup(result.read(), "html.parser",from_encoding="GBK")
 	if bt.title.string[:3] != "URP":
 		break
 
-os.remove("check.jpeg")
+os.remove("check.jpg")
 
 headers['Referer'] = 'http://jwxt.bupt.edu.cn/gradeLnAllAction.do?type=ln&oper=qb'
 req = urllib2.Request(
 	url = 'http://jwxt.bupt.edu.cn/gradeLnAllAction.do?type=ln&oper=sxinfo&lnsxdm=001',
 	headers = headers)
 
-bt = BeautifulSoup(opener.open(req).read(), "html.parser",from_encoding="gbk")
+bt = BeautifulSoup(opener.open(req).read(), "html.parser",from_encoding="GBK")
 tables = bt.find_all('tr', class_ ='odd')
 
 score = 0.0; count = 0.0
 for table in tables:
-	temp = BeautifulSoup(table.encode('gbk'), "html.parser", from_encoding='gbk')
+	temp = BeautifulSoup(table.encode('GBK'), "html.parser", from_encoding='GBK')
 	items = temp.find_all('td', align = 'center')
-	if items[5].encode('gbk')[38:-18] == "\xc8\xce\xd1\xa1\r":	# 任选
+	#print items
+	#if items[5].encode('GBK')[38:-18] == "\xc8\xce\xd1\xa1\r":	# 任选
+	#	continue
+	if items[6].encode('GBK')[38:-18] == "\xc3\xe2":	# 免修
 		continue
-	if items[6].encode('gbk')[38:-18] == "\xc3\xe2":	# 免修
-		continue
-	print str(int(items[0].encode('gbk')[37:-19])) + "\t",
-	print str(float(items[4].encode('gbk')[38:-18])) + "\t",
-	print str(int(items[6].encode('gbk')[38:-18])) + "\t",
-	print items[2].encode('gbk')[38:-18].decode('gbk')
-	factor = float(items[4].encode('gbk')[38:-18])
-	score += (float(items[6].encode('gbk')[38:-18]) * factor)
+	print str(int(items[0].encode('GBK')[37:-19])) + "\t",
+	print str(float(items[4].encode('GBK')[38:-18])) + "\t",
+	#print items[5].encode('GBK')[38:-18].decode('GBK')+ "\t",
+	print str(float(items[6].encode('GBK')[38:-18])) + "\t",
+	print items[2].encode('GBK')[38:-18].decode('GBK')    #items[3]是英文课程名称
+	factor = float(items[4].encode('GBK')[38:-18])
+	score += (float(items[6].encode('GBK')[38:-18]) * factor)
 	count += factor
 
 print ("GPA is : %.2f" % (float(score)/count))
-
+print ("总学分为：%.2f" % count)
 headers['DNT'] = '1'
 headers['Referer'] = 'http://jwxt.bupt.edu.cn/menu/s_top.jsp'
 postdata = urllib.urlencode({
