@@ -17,18 +17,27 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
+
+
+#Latest Edit Date : 2017/2/10
+#Modified by hutr96 <hutr96@gmail.com>
+#改动: 注释了略过任选课的部分，方便出国党计算GPA
+#给出了用英文课名替换中文输出的方法
+#输出总学分
+#在运行代码时遇到问题的解决办法请见README
+
 import urllib, urllib2, cookielib, re, sys, os
 import pytesseract
 from PIL import Image
 from bs4 import BeautifulSoup
-"""
+
 if len(sys.argv) != 3:
 	print "Usage: python2 gpa.py <id> <pwd>"
 	sys.exit(0)
 else:
 	username = sys.argv[1]
 	password = sys.argv[2]
-"""
+
 cookie = cookielib.CookieJar()
 opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie))
 
@@ -61,8 +70,8 @@ while True:
 
 	postdata=urllib.urlencode({
 		'type' : 'sso',
-	    'zjh'  : '2014210262',   #username
-	    'mm'   : 'hutr96',       #password
+	    'zjh'  : username,   #username
+	    'mm'   : password,       #password
 	    'v_yzm': checkInfo
 	})
 
@@ -101,7 +110,7 @@ for table in tables:
 	print str(float(items[4].encode('GBK')[38:-18])) + "\t",
 	#print items[5].encode('GBK')[38:-18].decode('GBK')+ "\t",
 	print str(float(items[6].encode('GBK')[38:-18])) + "\t",
-	print items[2].encode('GBK')[38:-18].decode('GBK')    #items[3]是英文课程名称
+	print items[2].encode('GBK')[38:-18].decode('GBK')    #改为items[3]便输出英文课程名称
 	factor = float(items[4].encode('GBK')[38:-18])
 	score += (float(items[6].encode('GBK')[38:-18]) * factor)
 	count += factor
