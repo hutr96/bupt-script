@@ -2,7 +2,7 @@
 作者：
 https://github.com/Forec/scripts-for-bupt/tree/master/get-your-gpa
 
-环境配置：
+环境配置（Windows）
 
 用pip安装：BeautifulSoup、pytesseract
 
